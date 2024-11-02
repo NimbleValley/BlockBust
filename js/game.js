@@ -152,6 +152,8 @@ document.body.addEventListener('mouseup', async function () {
         addBlock(parseInt(Math.random() * blockSelection) + 1, 5, 110, 0);
         addBlock(parseInt(Math.random() * blockSelection) + 1, 35, 155, 1);
         addBlock(parseInt(Math.random() * blockSelection) + 1, 55, 110, 2);
+    } else {
+        alert('ok')
     }
 });
 
@@ -206,7 +208,7 @@ function checkBlockPossible(i) {
             let allWork = true;
             if (filled[x][y] == 0) {
                 for (let m = 0; m < blocks[i].mini.length; m++) {
-                    if (x + blocks[i].mini[m].offsetX / 10 > 9 || y + blocks[i].mini[m].offsetY / 10 > 9 || filled[x + blocks[i].mini[m].offsetX / 10][y + blocks[i].mini[m].offsetY / 10] == 1) {
+                    if (x + blocks[i].mini[m].offsetX / 10 > 10 || y + blocks[i].mini[m].offsetY / 10 > 10 || filled[x + blocks[i].mini[m].offsetX / 10][y + blocks[i].mini[m].offsetY / 10] == 1) {
                         allWork = false;
                     }
                 }
