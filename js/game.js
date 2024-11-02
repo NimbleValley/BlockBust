@@ -152,8 +152,6 @@ document.body.addEventListener('mouseup', async function () {
         addBlock(parseInt(Math.random() * blockSelection) + 1, 5, 110, 0);
         addBlock(parseInt(Math.random() * blockSelection) + 1, 35, 155, 1);
         addBlock(parseInt(Math.random() * blockSelection) + 1, 55, 110, 2);
-    } else {
-        alert('ok')
     }
 });
 
