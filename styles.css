@@ -24,6 +24,7 @@ button {
 button:hover {
     cursor: pointer;
     scale: 1.15;
+    filter: invert(1);
 }
 
 #home-canvas {
@@ -33,6 +34,7 @@ button:hover {
     width: 100vw;
     height: 100vh;
     z-index: -10;
+    image-rendering: pixelated;
 }
 
 #game-canvas {
