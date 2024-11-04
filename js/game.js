@@ -12,13 +12,28 @@ var dragging = null;
 
 var score = 0;
 const scoreText = document.getElementById('score');
-const blockSelection = 36;
 
 for (let i = 0; i < 10; i++) {
     filled.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 }
 
 var blocks = [];
+const blockSelection = 36;
+
+var highScore = 0;
+const highScoreText = document.getElementById('high-score');
+
+highScore = parseInt(localStorage.getItem('high-score'));
+if (highScore == null || isNaN(highScore)) {
+    highScore = 0;
+    localStorage.setItem('high-score', 0);
+}
+
+if (highScore == 0) {
+    highScoreText.innerText = 'High: 000';
+} else {
+    highScoreText.innerText = `High: ${highScore}`;
+}
 
 function animate() {
     requestAnimationFrame(animate);
@@ -66,7 +81,6 @@ function animate() {
             }
             if (!checkOverlapY(dragging.block, snapY)) {
                 dragging.block.y = snapY;
-                console.log('yes')
             }
 
             if (checkIntersect(dragging.block)) {
@@ -78,7 +92,6 @@ function animate() {
             }
 
         } else {
-            console.log('no')
             dragging.block.x = mousePosition.x - dragging.offsetX;
             dragging.block.y = mousePosition.y - dragging.offsetY;
         }
@@ -115,6 +128,9 @@ document.body.addEventListener('mouseup', async function () {
     }
 
     for (let i = 0; i < mini.length; i++) {
+        if ((dragging.block.x + mini[i].offsetX) / 10 > 10 || (dragging.block.y + mini[i].offsetY) / 10 > 10) {
+            return;
+        }
         filled[(dragging.block.x + mini[i].offsetX) / 10][(dragging.block.y + mini[i].offsetY) / 10] = 1;
     }
 
@@ -134,12 +150,26 @@ document.body.addEventListener('mouseup', async function () {
     dragging.block.disabled = true;
     dragging = null;
 
-    checkDestroy();
-
     playClickSound();
+    
+    await checkDestroy();
+
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('high-score', highScore);
+        highScoreText.innerText = `High: ${highScore}`;
+    }
+
 
     if (await checkGameOver()) {
         alert('Game over!');
+
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('high-score', highScore);
+            highScoreText.innerText = `High: ${highScore}`;
+        }
+
         playExplosion();
         blocks = [];
         score = 0;
@@ -182,15 +212,14 @@ async function checkGameOver() {
             for (let x = 0; x < filled.length; x++) {
                 for (let y = 0; y < filled[x].length; y++) {
                     let allWork = true;
-                    if (filled[x][y] == 0) {
+                    if (filled[x + blocks[i].mini[0].offsetX / 10][y + blocks[i].mini[0].offsetY / 10] == 0) {
                         for (let m = 0; m < blocks[i].mini.length; m++) {
-                            if (x + blocks[i].mini[m].offsetX / 10 > 9 || y + blocks[i].mini[m].offsetY / 10 > 9 || filled[x + blocks[i].mini[m].offsetX / 10][y + blocks[i].mini[m].offsetY / 10] == 1) {
+                            if (x + blocks[i].mini[m].offsetX / 10 >= 10 || y + blocks[i].mini[m].offsetY / 10 >= 10 || filled[x + blocks[i].mini[m].offsetX / 10][y + blocks[i].mini[m].offsetY / 10] == 1) {
                                 allWork = false;
                             }
                         }
                     }
-                    if (allWork && filled[x][y] == 0) {
-                        console.log(i, x, y)
+                    if (allWork && filled[x + blocks[i].mini[0].offsetX / 10][y + blocks[i].mini[0].offsetY / 10] == 0) {
                         return false;
                     }
                 }
@@ -204,14 +233,14 @@ function checkBlockPossible(i) {
     for (let x = 0; x < filled.length; x++) {
         for (let y = 0; y < filled[x].length; y++) {
             let allWork = true;
-            if (filled[x][y] == 0) {
+            if (filled[x + blocks[i].mini[0].offsetX / 10][y + blocks[i].mini[0].offsetY / 10] == 0) {
                 for (let m = 0; m < blocks[i].mini.length; m++) {
-                    if (x + blocks[i].mini[m].offsetX / 10 > 10 || y + blocks[i].mini[m].offsetY / 10 > 10 || filled[x + blocks[i].mini[m].offsetX / 10][y + blocks[i].mini[m].offsetY / 10] == 1) {
+                    if (x + blocks[i].mini[m].offsetX / 10 >= 10 || y + blocks[i].mini[m].offsetY / 10 >= 10 || filled[x + blocks[i].mini[m].offsetX / 10][y + blocks[i].mini[m].offsetY / 10] == 1) {
                         allWork = false;
                     }
                 }
             }
-            if (allWork && filled[x][y] == 0) {
+            if (allWork && filled[x + blocks[i].mini[0].offsetX / 10][y + blocks[i].mini[0].offsetY / 10] == 0) {
                 console.log(i, x, y)
                 return true;
             }
@@ -231,7 +260,7 @@ async function checkDestroy() {
                 hasColumn = false;
         }
         if (hasColumn) {
-            destroyColumn(x);
+            await destroyColumn(x);
             counter *= 2;
         }
     }
@@ -242,7 +271,7 @@ async function checkDestroy() {
                 hasRow = false;
         }
         if (hasRow) {
-            destroyRow(y);
+            await destroyRow(y);
             counter *= 2;
         }
     }
@@ -286,6 +315,12 @@ async function destroyColumn(x) {
             if ((blocks[b].x + blocks[b].mini[m].offsetX) / 10 == x) {
                 filled[(blocks[b].x + blocks[b].mini[m].offsetX) / 10][(blocks[b].y + blocks[b].mini[m].offsetY) / 10] = 0;
                 blocks[b].mini.splice(m, 1);
+
+                if (blocks[b].mini.length == 0) {
+                    blocks.splice(b, 1);
+                    b--;
+                }
+
                 m--;
                 playClickSound2();
                 await sleep(80);
@@ -300,10 +335,12 @@ async function destroyColumn(x) {
 
 async function destroyRow(y) {
     for (let b = 0; b < blocks.length; b++) {
+        console.log(blocks[b], b, blocks.length)
         for (let m = 0; m < blocks[b].mini.length; m++) {
             if ((blocks[b].y + blocks[b].mini[m].offsetY) / 10 == y) {
                 filled[(blocks[b].x + blocks[b].mini[m].offsetX) / 10][(blocks[b].y + blocks[b].mini[m].offsetY) / 10] = 0;
                 blocks[b].mini.splice(m, 1);
+
                 m--;
                 playClickSound2();
                 await sleep(80);

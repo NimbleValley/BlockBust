@@ -50,7 +50,6 @@ button:hover {
     top: 0;
 }
 
-
 #score {
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     color: white;
@@ -60,4 +59,16 @@ button:hover {
     top: 2vh;
     margin: 0;
     background-color: transparent;
+}
+
+#high-score {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    color: white;
+    font-size: 7.5vh;
+    position: absolute;
+    left: 2vh;
+    top: 25vh;
+    margin: 0;
+    background-color: transparent;
+    font-weight: 100;
 }
