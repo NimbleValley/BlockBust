@@ -13,6 +13,8 @@ var dragging = null;
 var score = 0;
 const scoreText = document.getElementById('score');
 
+const zeroPad = (num, places) => String(num).padStart(places, '0');
+
 for (let i = 0; i < 10; i++) {
     filled.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 }
@@ -32,7 +34,7 @@ if (highScore == null || isNaN(highScore)) {
 if (highScore == 0) {
     highScoreText.innerText = 'High: 000';
 } else {
-    highScoreText.innerText = `High: ${highScore}`;
+    highScoreText.innerText = `High: ${zeroPad(highScore, 3)}`;
 }
 
 function animate() {
@@ -146,6 +148,9 @@ document.body.addEventListener('mouseup', async function () {
             break;
     }
 
+    score += 10;
+    scoreText.innerText = zeroPad(score, 3);
+
     dragging.block.color = dragging.color;
     dragging.block.disabled = true;
     dragging = null;
@@ -159,20 +164,19 @@ document.body.addEventListener('mouseup', async function () {
         highScoreText.innerText = `High: ${highScore}`;
     }
 
-
     if (await checkGameOver()) {
         alert('Game over!');
 
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('high-score', highScore);
-            highScoreText.innerText = `High: ${highScore}`;
+            highScoreText.innerText = `High: ${zeroPad(highScore, 3)}`;
         }
 
         playExplosion();
         blocks = [];
         score = 0;
-        scoreText.innerText = '000';
+        scoreText.innerText = zeroPad(0, 3);
         for (let x = 0; x < filled.length; x++) {
             for (let y = 0; y < filled[x].length; y++) {
                 filled[x][y] = 0;
@@ -276,10 +280,10 @@ async function checkDestroy() {
     }
 
     score += (counter - 1) * 100;
-    scoreText.innerText = score;
+    scoreText.innerText = zeroPad(score, 3);
 
     if (score == 0) {
-        scoreText.innerText = '000';
+        scoreText.innerText = zeroPad(0, 3);
     }
 
     if (counter > 1) {
