@@ -151,7 +151,6 @@ document.body.addEventListener('mouseup', async function () {
     dragging = null;
 
     playClickSound();
-    
     await checkDestroy();
 
     if (score > highScore) {
